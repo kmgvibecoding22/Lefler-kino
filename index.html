@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Читариум — вселенная историй на одной странице</title>
+<meta name="description" content="Онлайн-библиотека: поиск книг, жанры, отзывы, рейтинг, аудиокниги и скачивание в удобном формате.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M5 14c7-3 12-1 17 3v22c-5-4-10-6-17-3z' fill='%23FF6B6B'/%3E%3Cpath d='M26 17c3-3 6-4 9-4v22c-3 0-6 1-9 4z' fill='%237B5CFF'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --coral:#FF6B6B; --violet:#7B5CFF; --sun:#FFC94D; --mint:#3DDC97;
+  --bg:#FFF8F1; --surface:#FFFFFF; --surface-2:#FFF0E3; --text:#1E1B2E; --muted:#625C76; --line:#EADBCB;
+  --on-accent:#FFFFFF; --star:#FFB020; --shadow:0 18px 40px -22px rgba(123,92,255,.55);
+  --grad:linear-gradient(120deg,var(--coral),var(--violet));
+  --font-head:"Unbounded",system-ui,sans-serif; --font-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r-lg:28px; --r-md:18px; --r-sm:12px;
+  --tap:3rem;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 5.5rem);scroll-behavior:smooth;font-size:100%}
+html[data-font="l"]{font-size:125%} html[data-font="xl"]{font-size:150%}
+:root[data-theme="dark"]{--bg:#16131F;--surface:#221D30;--surface-2:#2A2340;--text:#F5F3FF;--muted:#B3ACC8;--line:#3A3150;--shadow:0 18px 40px -22px rgba(0,0,0,.8)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16131F;--surface:#221D30;--surface-2:#2A2340;--text:#F5F3FF;--muted:#B3ACC8;--line:#3A3150;--shadow:0 18px 40px -22px rgba(0,0,0,.8)}}
+:root[data-contrast="on"]{--bg:#FFFFFF;--surface:#FFFFFF;--surface-2:#FFFFFF;--text:#000000;--muted:#000000;--line:#000000;--coral:#000000;--violet:#000000;--grad:#000000;--star:#000000;--shadow:none}
+:root[data-contrast="on"][data-theme="dark"]{--bg:#000;--surface:#000;--surface-2:#000;--text:#FFF;--muted:#FFF;--line:#FFF;--coral:#FFF;--violet:#FFF;--grad:#FFF;--star:#FFF;--on-accent:#000}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;overflow-wrap:break-word;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:1rem;line-height:1.55;-webkit-font-smoothing:antialiased}
+body.has-player{padding-bottom:7.5rem}
+img,svg{max-width:100%;display:block}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--violet);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1200px,100% - 2.5rem);margin-inline:auto}
+h1,h2,h3{font-family:var(--font-head);line-height:1.15;margin:0;letter-spacing:-.01em}
+h2{font-size:clamp(1.6rem,3.2vw,2.4rem);font-weight:800}
+.section{padding-block:clamp(3rem,7vw,5.5rem)}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap;margin-bottom:1.75rem}
+.section-head p{margin:.4rem 0 0;color:var(--muted);max-width:52ch}
+button.t,.tile,.top-item{max-width:100%;min-width:0;overflow-wrap:anywhere}
+button.t{display:block;width:100%}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:var(--tap);padding:.7rem 1.3rem;border-radius:999px;border:2px solid transparent;font-weight:600;text-decoration:none;transition:transform .15s ease,background .15s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--violet);color:var(--on-accent)}
+.btn-coral{background:var(--coral);color:var(--on-accent)}
+.btn-ghost{background:transparent;border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--violet)}
+.btn-sm{min-height:2.5rem;padding:.4rem 1rem;font-size:.9rem}
+.icon-btn{width:var(--tap);height:var(--tap);display:inline-grid;place-items:center;border-radius:50%;border:2px solid var(--line);background:var(--surface);font-weight:700}
+.icon-btn:hover{border-color:var(--violet)}
+
+/* ---------- header ---------- */
+.site-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.site-header .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1.25rem;min-height:4.5rem;padding-block:.5rem}
+.logo{display:flex;align-items:center;gap:.6rem;text-decoration:none;font-family:var(--font-head);font-weight:800;font-size:1.3rem}
+.logo svg{width:2.4rem;height:2.4rem}
+.main-nav{display:flex;gap:.25rem;margin-left:auto;overflow-x:auto}
+.main-nav a{padding:.55rem .8rem;border-radius:999px;text-decoration:none;font-weight:500;white-space:nowrap;color:var(--muted)}
+.main-nav a:hover{color:var(--text);background:var(--surface-2)}
+.header-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.5rem;align-items:center}
+@media (max-width:980px){.main-nav{display:none}.header-actions{margin-left:auto}}
+@media (max-width:480px){.logo span{display:none}#loginBtn .lbl{display:none}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;padding-block:clamp(2.5rem,6vw,5rem)}
+.hero-bg{position:absolute;inset:0;z-index:-1;background:
+  radial-gradient(60% 70% at 85% 30%,var(--c1,#FF6B6B) 0%,transparent 60%),
+  radial-gradient(50% 60% at 65% 90%,var(--c2,#7B5CFF) 0%,transparent 65%);opacity:.35}
+:root[data-contrast="on"] .hero-bg{display:none}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(2rem,5vw,4rem);align-items:center}
+.hero-label{display:inline-flex;align-items:center;gap:.5rem;background:var(--sun);color:#1E1B2E;font-weight:700;padding:.35rem .9rem;border-radius:999px;font-size:.95rem}
+.hero h1{font-size:clamp(2.3rem,6vw,4.6rem);font-weight:800;margin:1.1rem 0 .6rem;text-wrap:balance}
+.hero .author{font-size:1.2rem;color:var(--muted);margin:0 0 1rem}
+.hero .desc{max-width:52ch;font-size:1.1rem;margin:1rem 0 1.75rem}
+.hero .actions{display:flex;flex-wrap:wrap;gap:.75rem}
+.hero-cover{position:relative;justify-self:center;width:min(340px,80%)}
+.hero-cover .cover{transform:rotate(4deg);box-shadow:0 40px 60px -30px rgba(30,27,46,.6);border-radius:10px 18px 18px 10px}
+.hero-cover .badge-one{position:absolute;z-index:2;top:-1rem;left:-1.2rem;width:5.2rem;height:5.2rem;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;text-align:center;font-family:var(--font-head);font-weight:800;line-height:1;transform:rotate(-10deg);font-size:.8rem}
+.hero-cover .badge-one b{display:block;font-size:1.6rem}
+@media (max-width:820px){.hero .wrap{grid-template-columns:1fr}.hero-cover{order:-1;width:min(240px,60%)}}
+
+/* ---------- covers ---------- */
+.cover{width:100%;aspect-ratio:2/3;border-radius:6px 12px 12px 6px;overflow:hidden;background:var(--surface-2)}
+.cover svg{width:100%;height:100%}
+
+/* ---------- stars ---------- */
+.stars{position:relative;display:inline-block;font-size:1.05em;letter-spacing:.08em;line-height:1;color:var(--line)}
+.stars::before{content:"★★★★★"}
+.stars i{position:absolute;inset:0 auto 0 0;overflow:hidden;white-space:nowrap;color:var(--star);font-style:normal}
+.stars i::before{content:"★★★★★"}
+.rating-line{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.rating-line b{font-size:1.05rem}
+.rating-line small{color:var(--muted)}
+
+/* ---------- search ---------- */
+.search-box{position:relative;max-width:820px;margin:0 auto}
+.search-field{display:flex;align-items:center;gap:.75rem;background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:.4rem .5rem .4rem 1.4rem;box-shadow:var(--shadow)}
+.search-field:focus-within{border-color:var(--violet)}
+.search-field input{flex:1;border:0;background:transparent;font-size:1.15rem;min-height:var(--tap);outline:none;min-width:0}
+.kbd{border:1px solid var(--line);border-radius:6px;padding:.1rem .45rem;font-size:.8rem;color:var(--muted)}
+.suggest{position:absolute;left:0;right:0;top:calc(100% + .5rem);background:var(--surface);border:2px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow);padding:.4rem;z-index:30;max-height:26rem;overflow:auto}
+.suggest button{display:flex;gap:.9rem;align-items:center;width:100%;text-align:left;padding:.5rem .6rem;border:0;background:none;border-radius:var(--r-sm)}
+.suggest button:hover,.suggest button[aria-selected="true"]{background:var(--surface-2)}
+.suggest .cover{width:2.4rem;flex:none}
+.suggest small{display:block;color:var(--muted)}
+mark{background:color-mix(in srgb,var(--sun) 70%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+.search-intro{text-align:center;margin-bottom:1.5rem}
+.search-intro p{color:var(--muted);margin:.5rem 0 0}
+
+/* ---------- top 10 ---------- */
+.rail{display:flex;gap:1.5rem;overflow-x:auto;padding:.5rem .25rem 1.25rem;scroll-snap-type:x mandatory}
+.top-item{flex:0 0 clamp(150px,17vw,190px);scroll-snap-align:start;position:relative;border:0;background:none;padding:0 0 0 2.4rem;text-align:left}
+.top-item .num{position:absolute;left:0;bottom:3.3rem;font-family:var(--font-head);font-weight:800;font-size:5.2rem;line-height:.8;color:transparent;-webkit-text-stroke:2px var(--violet)}
+.top-item .cover{position:relative;transition:transform .2s ease}
+.top-item:hover .cover{transform:translateY(-6px) rotate(-1.5deg)}
+.top-item h3{font-family:var(--font-body);font-size:1rem;font-weight:700;margin:.7rem 0 .15rem;line-height:1.3}
+.top-item p{margin:0;color:var(--muted);font-size:.9rem}
+
+/* ---------- genres ---------- */
+.genres{display:flex;flex-wrap:wrap;gap:.75rem}
+.genre{--g:#7B5CFF;display:inline-flex;align-items:center;gap:.6rem;min-height:var(--tap);padding:.55rem 1.1rem .55rem .6rem;border-radius:999px;border:2px solid color-mix(in srgb,var(--g) 45%,transparent);background:color-mix(in srgb,var(--g) 10%,var(--surface));font-weight:600}
+.genre .ic{width:2.1rem;height:2.1rem;border-radius:50%;display:grid;place-items:center;background:var(--g);font-size:1.05rem}
+.genre small{color:var(--muted);font-weight:500}
+.genre[aria-pressed="true"]{background:var(--g);color:#fff;border-color:var(--g)}
+.genre[aria-pressed="true"] small{color:#fff}
+.genre[aria-pressed="true"] .ic{background:rgba(255,255,255,.25)}
+:root[data-contrast="on"] .genre{border-color:var(--text);background:var(--surface)}
+:root[data-contrast="on"] .genre .ic{background:transparent}
+:root[data-contrast="on"] .genre[aria-pressed="true"]{background:var(--text);color:var(--bg)}
+
+/* ---------- catalog ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:.75rem 1rem;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:1rem 1.2rem;margin-bottom:1.75rem}
+.filters label{display:inline-flex;flex-wrap:wrap;align-items:center;gap:.5rem;font-weight:500;max-width:100%}
+.filters select{max-width:100%}
+.filters select{min-height:2.75rem;border-radius:var(--r-sm);border:2px solid var(--line);background:var(--bg);padding:.3rem .6rem}
+.filters input[type=checkbox]{width:1.3rem;height:1.3rem;accent-color:var(--violet)}
+.active-q{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px,40%),1fr));gap:2rem 1.5rem}
+.tile{border:0;background:none;padding:0;text-align:left;display:flex;flex-direction:column;gap:.5rem}
+.tile .cover{transition:transform .2s ease,box-shadow .2s}
+.tile:hover .cover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.tile h3{font-family:var(--font-body);font-size:1.02rem;font-weight:700;line-height:1.3}
+.tile .by{margin:-.3rem 0 0;color:var(--muted);font-size:.92rem}
+.badges{display:flex;gap:.35rem;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:.25rem;font-size:.78rem;font-weight:600;padding:.15rem .55rem;border-radius:999px;background:var(--surface-2);border:1px solid var(--line)}
+.chip.g{background:color-mix(in srgb,var(--g) 16%,var(--surface));border-color:color-mix(in srgb,var(--g) 40%,transparent)}
+.empty{text-align:center;padding:2.5rem 1rem;background:var(--surface);border-radius:var(--r-lg);border:2px dashed var(--line)}
+.empty h3{font-size:1.3rem;margin-bottom:.5rem}
+.more{display:flex;justify-content:center;margin-top:2.5rem}
+
+/* ---------- rating table ---------- */
+.rank-list{list-style:none;margin:0;padding:0;border-top:2px solid var(--text)}
+.rank-list li{display:grid;grid-template-columns:3rem 3.2rem minmax(0,1fr) auto;gap:1rem;align-items:center;padding:.85rem .25rem;border-bottom:1px solid var(--line)}
+.rank-list .pos{font-family:var(--font-head);font-weight:800;font-size:1.4rem;color:var(--violet)}
+.rank-list button.t{border:0;background:none;padding:0;text-align:left;font-weight:700;font-size:1.05rem}
+.rank-list .meta{color:var(--muted);font-size:.9rem}
+.rank-list .score{text-align:right}
+.rank-list .score b{font-family:var(--font-head);font-size:1.3rem}
+.bar{height:.4rem;border-radius:999px;background:var(--surface-2);overflow:hidden;margin-top:.35rem;width:8rem;max-width:100%;margin-left:auto}
+.bar span{display:block;height:100%;background:var(--grad)}
+@media (max-width:600px){.rank-list li{grid-template-columns:2.2rem 2.6rem minmax(0,1fr)}.rank-list .score{grid-column:3;text-align:left}.bar{margin-left:0}}
+
+/* ---------- audiobooks ---------- */
+.audio-section{background:#1E1B2E;color:#F5F3FF;border-radius:clamp(0px,3vw,40px);margin-inline:clamp(0px,2vw,1.5rem)}
+:root[data-contrast="on"] .audio-section{background:var(--bg);color:var(--text);border:3px solid var(--text)}
+.audio-section .section-head p{color:#C9C2E0}
+:root[data-contrast="on"] .audio-section .section-head p{color:var(--text)}
+.audio-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:1rem}
+.aitem{display:grid;grid-template-columns:4.5rem minmax(0,1fr) auto;gap:1rem;align-items:center;padding:.9rem;border-radius:var(--r-md);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+:root[data-contrast="on"] .aitem{background:none;border-color:var(--text)}
+.aitem h3{font-family:var(--font-body);font-size:1.02rem;font-weight:700}
+.aitem button.t{border:0;background:none;padding:0;text-align:left;color:inherit}
+.aitem p{margin:.2rem 0 0;font-size:.88rem;color:#C9C2E0}
+:root[data-contrast="on"] .aitem p{color:var(--text)}
+.play-round{width:3.4rem;height:3.4rem;border-radius:50%;border:0;background:var(--coral);color:#fff;display:grid;place-items:center;font-size:1.2rem}
+:root[data-contrast="on"] .play-round{background:var(--text);color:var(--bg)}
+
+/* ---------- reviews ---------- */
+.review-feed{columns:3 300px;column-gap:1.5rem}
+.rcard{break-inside:avoid;margin:0 0 1.5rem;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg) var(--r-lg) var(--r-lg) 6px;padding:1.25rem 1.4rem}
+.rcard header{display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem}
+.ava{width:2.5rem;height:2.5rem;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none}
+.rcard header small{display:block;color:var(--muted)}
+.rcard p{margin:.5rem 0}
+.rcard .on{border:0;background:none;padding:0;color:var(--violet);font-weight:600;text-align:left}
+
+/* ---------- footer ---------- */
+.site-footer{border-top:1px solid var(--line);padding-block:3rem 4rem;margin-top:3rem}
+.site-footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2rem}
+.site-footer nav{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem}
+.site-footer p{color:var(--muted);margin:.5rem 0 0}
+
+/* ---------- dialogs ---------- */
+dialog{border:0;padding:0;background:var(--surface);color:var(--text);border-radius:var(--r-lg);max-width:min(1000px,calc(100% - 1.5rem));width:100%;max-height:calc(100% - 2rem);box-shadow:0 40px 80px -30px rgba(0,0,0,.6)}
+dialog::backdrop{background:rgba(22,19,31,.6);backdrop-filter:blur(4px)}
+dialog.small{max-width:min(520px,calc(100% - 1.5rem))}
+.dlg-close{position:sticky;top:.75rem;float:right;margin:.75rem .75rem 0 0;z-index:2}
+.dlg-body{padding:clamp(1.25rem,4vw,2.5rem)}
+.book-top{display:grid;grid-template-columns:minmax(180px,280px) 1fr;gap:clamp(1.25rem,4vw,2.5rem)}
+@media (max-width:640px){.book-top{grid-template-columns:1fr}.book-top>div:first-child{width:min(200px,60%)}}
+.book-top>div{min-width:0}
+.book-top h2{font-size:clamp(1.6rem,4vw,2.4rem);margin:.4rem 0}
+.book-top .author{color:var(--muted);font-size:1.1rem;margin:0 0 1rem}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem 1rem;margin:1rem 0;padding:0}
+.facts div{display:flex;flex-direction:column}
+.facts dt{color:var(--muted);font-size:.85rem}
+.facts dd{margin:0;font-weight:600}
+.book-desc.clamped{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.linkish{border:0;background:none;padding:0;color:var(--violet);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.block{margin-top:2.25rem;padding-top:1.75rem;border-top:1px solid var(--line)}
+.block h3{font-size:1.25rem;margin-bottom:1rem}
+.hist{display:grid;gap:.35rem;max-width:22rem;min-width:0!important}
+.hist div{display:grid;grid-template-columns:2.5rem 1fr 3rem;gap:.6rem;align-items:center;font-size:.9rem}
+.hist .track{height:.6rem;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.hist .track span{display:block;height:100%;background:var(--star)}
+.rate-pick{display:inline-flex;flex-wrap:wrap;gap:.15rem;max-width:100%}
+.hist div{min-width:0}
+#blk-reviews label{flex-wrap:wrap;max-width:100%}#revSort{max-width:100%}
+.rate-pick button{border:0;background:none;font-size:2rem;line-height:1;padding:.2rem;color:var(--line);min-width:2.75rem;min-height:2.75rem}
+.rate-pick button.on{color:var(--star)}
+.narrator{display:flex;align-items:center;gap:.9rem;margin-bottom:1rem}
+.narrator .ava{width:3.2rem;height:3.2rem;font-size:1.1rem}
+.chapters{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:var(--r-md);max-height:16rem;overflow:auto}
+.chapters li+li{border-top:1px solid var(--line)}
+.chapters button{display:flex;justify-content:space-between;width:100%;border:0;background:none;padding:.75rem 1rem;min-height:var(--tap);text-align:left}
+.chapters button:hover{background:var(--surface-2)}
+.chapters .now{color:var(--violet);font-weight:700}
+.formats{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(210px,100%),1fr));gap:.75rem}
+.fmt{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;padding:.9rem 1rem;border-radius:var(--r-md);border:2px solid var(--line);background:var(--bg);text-align:left;min-height:var(--tap)}
+.fmt:hover{border-color:var(--violet)}
+.fmt b{font-family:var(--font-head);font-size:1rem}
+.fmt span{font-size:.85rem;color:var(--muted)}
+.notice{padding:1rem 1.2rem;border-radius:var(--r-md);background:var(--surface-2);color:var(--muted)}
+.review-form{display:grid;gap:.9rem;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:1.2rem;margin-bottom:1.5rem}
+.review-form textarea{width:100%;min-height:7rem;border-radius:var(--r-sm);border:2px solid var(--line);background:var(--surface);padding:.75rem;resize:vertical}
+.review-form label.cb{display:inline-flex;align-items:center;gap:.5rem;margin-right:1.25rem}
+.review-form input[type=checkbox]{width:1.25rem;height:1.25rem;accent-color:var(--violet)}
+.review-form .hint{font-size:.85rem;color:var(--muted)}
+.rev{padding:1.1rem 0;border-bottom:1px solid var(--line)}
+.rev header{display:flex;gap:.75rem;align-items:center}
+.rev header small{display:block;color:var(--muted)}
+.rev .spoiler{filter:blur(6px);cursor:pointer;user-select:none}
+.rev .actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+.similar{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:1.25rem}
+.field{display:grid;gap:.35rem;margin-bottom:1rem}
+.field input{min-height:var(--tap);border-radius:var(--r-sm);border:2px solid var(--line);background:var(--bg);padding:.5rem .8rem}
+.seg{display:flex;flex-wrap:wrap;gap:.5rem}
+.seg button{min-height:var(--tap);padding:.5rem 1rem;border-radius:var(--r-sm);border:2px solid var(--line);background:var(--bg);font-weight:600}
+.seg button[aria-pressed="true"]{border-color:var(--violet);background:var(--violet);color:var(--on-accent)}
+.setting{margin-bottom:1.5rem}
+.setting h3{font-family:var(--font-body);font-size:1.05rem;margin-bottom:.25rem}
+.setting p{margin:0 0 .6rem;color:var(--muted);font-size:.92rem}
+
+/* ---------- player ---------- */
+#player{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#1E1B2E;color:#F5F3FF;padding:.75rem 0 calc(.75rem + env(safe-area-inset-bottom,0px));box-shadow:0 -20px 40px -20px rgba(0,0,0,.5)}
+:root[data-contrast="on"] #player{background:var(--bg);color:var(--text);border-top:3px solid var(--text)}
+#player .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto;gap:1rem;align-items:center}
+.p-center{order:2}.p-right{order:3}
+#player .p-info{display:flex;gap:.75rem;align-items:center;min-width:0}
+#player .p-info .cover{width:2.8rem;flex:none}
+#player .p-title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
+#player .p-sub{font-size:.82rem;color:#C9C2E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
+:root[data-contrast="on"] #player .p-sub{color:var(--text)}
+.p-center{display:grid;gap:.35rem}
+.p-ctrls{display:flex;justify-content:center;align-items:center;gap:.6rem}
+.pbtn{width:2.75rem;height:2.75rem;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:transparent;color:inherit;display:grid;place-items:center;font-size:.78rem;font-weight:700}
+.pbtn.main{width:3.2rem;height:3.2rem;background:var(--coral);border:0;color:#fff;font-size:1.15rem}
+:root[data-contrast="on"] .pbtn{border-color:currentColor}
+:root[data-contrast="on"] .pbtn.main{background:var(--text);color:var(--bg)}
+.p-progress{display:grid;grid-template-columns:auto 1fr auto;gap:.6rem;align-items:center;font-size:.82rem;font-variant-numeric:tabular-nums}
+.p-progress input{width:100%;accent-color:var(--coral)}
+.p-right{display:flex;gap:.5rem;align-items:center}
+.p-right select{background:transparent;color:inherit;border:1px solid rgba(255,255,255,.3);border-radius:8px;min-height:2.5rem;padding:.2rem .4rem;max-width:9rem}
+.p-right select option{color:#1E1B2E}
+.p-right input[type=range]{width:5rem;accent-color:var(--coral)}
+.eq{display:inline-flex;gap:2px;align-items:flex-end;height:1rem;margin-left:.4rem}
+.eq i{width:3px;background:var(--mint);height:30%;border-radius:2px}
+.playing .eq i{animation:eq .9s ease-in-out infinite alternate}
+.eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}.eq i:nth-child(4){animation-delay:.1s}
+@keyframes eq{to{height:100%}}
+@media (max-width:900px){#player .wrap{grid-template-columns:minmax(0,1fr) auto}.p-right{order:2}.p-center{grid-column:1/-1;order:3}.p-right .opt{display:none}#player .p-title,#player .p-sub{max-width:60vw}}
+.bigplayer .pbtn{width:4rem;height:4rem;font-size:1rem}
+.bigplayer .pbtn.main{width:4.6rem;height:4.6rem;font-size:1.6rem}
+.bigplayer .p-progress{font-size:1.1rem}
+.bigplayer body.has-player,html.bigplayer body.has-player{padding-bottom:11rem}
+
+/* ---------- toast ---------- */
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(1.5rem + env(safe-area-inset-bottom,0px));z-index:100;display:grid;gap:.5rem;width:min(460px,calc(100% - 2rem))}
+body.has-player #toasts{bottom:calc(8.5rem + env(safe-area-inset-bottom,0px))}
+.toast{background:var(--text);color:var(--bg);padding:1rem 1.2rem;border-radius:var(--r-md);font-weight:600;box-shadow:0 20px 40px -20px rgba(0,0,0,.6);display:flex;gap:.75rem;align-items:center}
+.toast::before{content:"✓";display:grid;place-items:center;width:1.6rem;height:1.6rem;border-radius:50%;background:var(--mint);color:#1E1B2E;flex:none}
+.toast.warn::before{content:"!";background:var(--sun)}
+
+/* ---------- simple mode & motion ---------- */
+html.simple .rail{flex-direction:column;overflow:visible}
+html.simple .top-item{flex:none;display:grid;grid-template-columns:5rem 1fr;gap:1rem;align-items:center;padding:0}
+html.simple .top-item .num{position:static;font-size:1.5rem;-webkit-text-stroke:0;color:var(--violet);grid-row:span 3}
+html.simple .top-item .cover{display:none}
+html.simple .grid{grid-template-columns:1fr}
+html.simple .tile{display:grid;grid-template-columns:5.5rem 1fr;gap:.25rem 1rem;align-items:start}
+html.simple .tile .cover{grid-row:span 4}
+html.simple .hero-cover .cover{transform:none}
+html.simple .hero-bg{display:none}
+html.simple .review-feed{columns:1}
+html.reduce *,html.simple *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+html.lg-tap{--tap:3.4rem}
+</style>
+</head>
+<body>
+
+<a class="sr-only" href="#catalog">Перейти к каталогу</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="#week" aria-label="Читариум — на главную">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <defs><linearGradient id="lgL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF6B6B"/><stop offset="1" stop-color="#7B5CFF"/></linearGradient></defs>
+        <path d="M4 15c7-3 13-2 18 3v23c-5-4-11-5-18-3z" fill="url(#lgL)"/>
+        <path d="M25 18c2.5-2.3 5-3.6 8-4" stroke="url(#lgL)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <g stroke="url(#lgL)" stroke-width="3" stroke-linecap="round"><path d="M28 24v10"/><path d="M33 20v18"/><path d="M38 25v8"/><path d="M43 22v14"/></g>
+        <path d="M22 3l1.6 3.6 3.9.4-2.9 2.6.8 3.9L22 11.5l-3.4 2 .8-3.9-2.9-2.6 3.9-.4z" fill="#FFC94D"/>
+      </svg>
+      <span>Читариум</span>
+    </a>
+    <nav class="main-nav" aria-label="Разделы">
+      <a href="#top">Топ недели</a><a href="#genres">Жанры</a><a href="#catalog">Каталог</a><a href="#rating">Рейтинг</a><a href="#audio">Аудиокниги</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Поиск (клавиша /)" title="Поиск">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      </button>
+      <button class="icon-btn" id="aaBtn" aria-label="Настройки удобства: размер шрифта, контраст" title="Удобство чтения">Аа</button>
+      <button class="icon-btn" id="themeBtn" aria-label="Переключить тему" title="Тема">◐</button>
+      <button class="btn btn-primary btn-sm" id="loginBtn"><span aria-hidden="true">👤</span> <span class="lbl">Войти</span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="week" aria-labelledby="heroTitle">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="wrap" id="hero"></div>
+  </section>
+
+  <section class="section" id="search" style="padding-top:1rem">
+    <div class="wrap">
+      <div class="search-intro">
+        <h2>Что почитаем?</h2>
+        <p>Ищите по названию, автору или чтецу аудиокниги</p>
+      </div>
+      <div class="search-box">
+        <div class="search-field">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <label for="q" class="sr-only">Поиск книг</label>
+          <input id="q" type="search" placeholder="Например, «Остров сокровищ» или Толстой" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
+          <span class="kbd" aria-hidden="true">/</span>
+          <button class="btn btn-coral btn-sm" id="qGo">Найти</button>
+        </div>
+        <div class="suggest" id="suggest" role="listbox" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="top" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head"><div><h2>Топ-10 недели</h2><p>Книги, которые чаще всего оценивали, слушали и скачивали за последние 7 дней</p></div></div>
+      <div class="rail" id="topRail"></div>
+    </div>
+  </section>
+
+  <section class="section" id="genres" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head"><div><h2>Жанры</h2><p>Выберите один или несколько — каталог ниже сразу отфильтруется</p></div></div>
+      <div class="genres" id="genreList"></div>
+    </div>
+  </section>
+
+  <section class="section" id="catalog" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head"><div><h2>Каталог</h2><p id="catCount"></p></div></div>
+      <div class="filters" role="group" aria-label="Фильтры каталога">
+        <label>Оценка
+          <select id="fRating"><option value="0">любая</option><option value="4.5">от 4,5 ★</option><option value="4">от 4 ★</option><option value="3.5">от 3,5 ★</option></select>
+        </label>
+        <label>Год
+          <select id="fYear"><option value="">любой</option><option value="old">до 1900</option><option value="xx">1900–1999</option><option value="new">2000 и новее</option></select>
+        </label>
+        <label><input type="checkbox" id="fAudio"> Есть аудиокнига</label>
+        <label><input type="checkbox" id="fDl"> Можно скачать</label>
+        <label style="margin-left:auto">Сортировка
+          <select id="fSort"><option value="rating">по рейтингу</option><option value="popular">по популярности</option><option value="new">сначала новые</option><option value="title">по названию</option></select>
+        </label>
+      </div>
+      <div class="active-q" id="activeQ" hidden></div>
+      <div class="grid" id="catalogGrid"></div>
+      <div class="more"><button class="btn btn-ghost" id="moreBtn">Показать ещё</button></div>
+    </div>
+  </section>
+
+  <section class="section" id="rating" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head"><div><h2>Рейтинг книг</h2><p>Лучшие книги за всё время. Учитываем и среднюю оценку, и число оценок — одна случайная «пятёрка» не выведет книгу на первое место</p></div></div>
+      <ol class="rank-list" id="rankList"></ol>
+    </div>
+  </section>
+
+  <section class="section audio-section" id="audio">
+    <div class="wrap">
+      <div class="section-head"><div><h2>Аудиокниги</h2><p>Слушайте в дороге и за делами. Плеер запоминает, где вы остановились</p></div></div>
+      <div class="audio-list" id="audioList"></div>
+    </div>
+  </section>
+
+  <section class="section" id="reviews">
+    <div class="wrap">
+      <div class="section-head"><div><h2>Свежие отзывы</h2><p>Что пишут те, кто уже прочитал</p></div></div>
+      <div class="review-feed" id="reviewFeed"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div>
+      <a class="logo" href="#week" style="font-size:1.1rem">Читариум</a>
+      <p>Вселенная историй на одной странице.</p>
+      <p style="font-size:.85rem">Демо-версия. Все книги на сайте — собственные или лицензированные материалы.</p>
+    </div>
+    <nav aria-label="Информация">
+      <a href="#" data-info="about">О проекте</a><a href="#" data-info="rights">Правообладателям</a><a href="#" data-info="privacy">Политика конфиденциальности</a><a href="#" data-info="terms">Пользовательское соглашение</a><a href="#" data-info="contacts">Контакты</a>
+    </nav>
+  </div>
+</footer>
+
+<!-- Book dialog -->
+<dialog id="bookDlg" aria-labelledby="bookTitle">
+  <button class="icon-btn dlg-close" data-close aria-label="Закрыть">✕</button>
+  <div class="dlg-body" id="bookBody"></div>
+</dialog>
+
+<!-- Settings dialog -->
+<dialog id="aaDlg" class="small" aria-labelledby="aaTitle">
+  <button class="icon-btn dlg-close" data-close aria-label="Закрыть">✕</button>
+  <div class="dlg-body">
+    <h2 id="aaTitle" style="font-size:1.5rem;margin-bottom:1.5rem">Удобство чтения</h2>
+    <div class="setting"><h3>Размер шрифта</h3><p>Меняет размер всего текста и кнопок на сайте</p>
+      <div class="seg" data-set="font"><button data-v="m">Обычный</button><button data-v="l" style="font-size:1.15em">Крупный</button><button data-v="xl" style="font-size:1.3em">Очень крупный</button></div></div>
+    <div class="setting"><h3>Высокий контраст</h3><p>Чёрный текст на белом фоне, без цветных подложек</p>
+      <div class="seg" data-set="contrast"><button data-v="off">Выключен</button><button data-v="on">Включён</button></div></div>
+    <div class="setting"><h3>Упрощённый режим</h3><p>Книги простым списком, без каруселей и анимаций</p>
+      <div class="seg" data-set="simple"><button data-v="off">Выключен</button><button data-v="on">Включён</button></div></div>
+    <div class="setting"><h3>Меньше движения</h3><p>Отключает анимации на сайте</p>
+      <div class="seg" data-set="reduce"><button data-v="off">Выключено</button><button data-v="on">Включено</button></div></div>
+    <div class="setting"><h3>Крупный плеер</h3><p>Большие кнопки управления аудиокнигой</p>
+      <div class="seg" data-set="bigplayer"><button data-v="off">Выключен</button><button data-v="on">Включён</button></div></div>
+    <button class="btn btn-primary" data-close style="width:100%">Готово</button>
+  </div>
+</dialog>
+
+<!-- Login dialog -->
+<dialog id="loginDlg" class="small" aria-labelledby="loginTitle">
+  <button class="icon-btn dlg-close" data-close aria-label="Закрыть">✕</button>
+  <div class="dlg-body" id="loginBody"></div>
+</dialog>
+
+<!-- Info dialog -->
+<dialog id="infoDlg" class="small">
+  <button class="icon-btn dlg-close" data-close aria-label="Закрыть">✕</button>
+  <div class="dlg-body" id="infoBody"></div>
+</dialog>
+
+<!-- Player -->
+<div id="player" hidden role="region" aria-label="Аудиоплеер">
+  <div class="wrap">
+    <div class="p-info">
+      <div class="cover" id="pCover"></div>
+      <div style="min-width:0"><div class="p-title" id="pTitle"></div><div class="p-sub" id="pSub"></div></div>
+      <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    </div>
+    <div class="p-right">
+      <label class="opt"><span class="sr-only">Скорость</span>
+        <select id="pSpeed" title="Скорость"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
+      <label class="opt"><span class="sr-only">Глава</span><select id="pChapter" title="Глава"></select></label>
+      <label class="opt"><span class="sr-only">Таймер сна</span>
+        <select id="pSleep" title="Таймер сна"><option value="0">⏾ Сон: выкл</option><option value="15">⏾ 15 мин</option><option value="30">⏾ 30 мин</option><option value="60">⏾ 60 мин</option><option value="ch">⏾ До конца главы</option></select></label>
+      <label class="opt" title="Громкость"><span aria-hidden="true">🔊</span><span class="sr-only">Громкость</span><input type="range" id="pVol" min="0" max="100" value="80"></label>
+      <button class="pbtn" id="pBig" title="Крупный плеер" aria-label="Крупный плеер">A+</button>
+      <button class="pbtn" id="pClose" aria-label="Закрыть плеер">✕</button>
+    </div>
+    <div class="p-center">
+      <div class="p-ctrls">
+        <button class="pbtn" id="pBack" aria-label="Назад на 15 секунд">−15</button>
+        <button class="pbtn main" id="pPlay" aria-label="Пауза">❚❚</button>
+        <button class="pbtn" id="pFwd" aria-label="Вперёд на 15 секунд">+15</button>
+      </div>
+      <div class="p-progress">
+        <span id="pCur">0:00</span>
+        <input type="range" id="pSeek" min="0" max="100" value="0" step="1" aria-label="Позиция в главе">
+        <span id="pLeft">−0:00</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+/* ================== DATA ================== */
+const GENRES=[
+ {id:'novel',name:'Роман',color:'#E8508A',icon:'💗'},
+ {id:'fantasy',name:'Фэнтези',color:'#7B5CFF',icon:'🐉'},
+ {id:'scifi',name:'Фантастика',color:'#14B8C4',icon:'🚀'},
+ {id:'detective',name:'Детектив',color:'#2E4A9E',icon:'🔍'},
+ {id:'thriller',name:'Триллер',color:'#C0392B',icon:'⚡'},
+ {id:'classic',name:'Классика',color:'#B07A2A',icon:'🏛️'},
+ {id:'adventure',name:'Приключения',color:'#F08A24',icon:'🧭'},
+ {id:'nonfiction',name:'Нон-фикшн',color:'#3DAA7A',icon:'💡'},
+ {id:'psychology',name:'Психология',color:'#9B59B6',icon:'🧠'},
+ {id:'business',name:'Бизнес',color:'#34495E',icon:'📈'},
+ {id:'kids',name:'Детские',color:'#F5B700',icon:'🧸'},
+ {id:'poetry',name:'Поэзия',color:'#D9608F',icon:'🪶'},
+ {id:'history',name:'История',color:'#8E5B3E',icon:'📜'},
+ {id:'bio',name:'Биографии',color:'#2B8A9E',icon:'👤'}
+];
+const NARRATORS={
+ korneev:{name:'Алексей Корнеев',color:'#7B5CFF',bio:'Актёр театра, озвучил более 120 книг'},
+ svetlova:{name:'Марина Светлова',color:'#E8508A',bio:'Мягкий тембр, любимица слушателей детских книг'},
+ dronov:{name:'Игорь Дронов',color:'#2E4A9E',bio:'Мастер напряжённых детективов и триллеров'},
+ vishnevskaya:{name:'Елена Вишневская',color:'#B07A2A',bio:'Специализируется на русской классике'},
+ belov:{name:'Сергей Белов',color:'#14B8C4',bio:'Озвучивает фантастику и нон-фикшн'},
+ kotova:{name:'Анна Котова',color:'#F08A24',bio:'Читает приключения и поэзию'}
+};
+// a:[narrator, total minutes, chapters]
+const BOOKS=[
+ {slug:'gorod-bez-kart',title:'Город без карт',author:'Мира Северова',year:2023,pages:412,pub:'Читариум Издат',g:['fantasy','adventure'],c:['#7B5CFF','#FF6B6B'],r:4.8,n:1840,w:96,dl:true,a:['korneev',754,24],
+  d:'Картограф Лея просыпается в городе, улицы которого меняются каждую ночь. Чтобы вернуться домой, ей придётся составить первую в истории карту места, которое не хочет, чтобы его нашли. История о памяти, дружбе и смелости идти туда, где нет дорог.'},
+ {slug:'signal-s-evropy',title:'Сигнал с Европы',author:'Андрей Луцкий',year:2022,pages:368,pub:'Северный ветер',g:['scifi','thriller'],c:['#14B8C4','#1E1B2E'],r:4.6,n:1320,w:81,dl:true,a:['belov',620,18],
+  d:'Подлёдная станция на спутнике Юпитера принимает сигнал, который повторяет голоса членов экипажа — ещё до того, как они что-то сказали. Напряжённая научная фантастика о контакте, доверии и цене любопытства.'},
+ {slug:'tihaya-ulica-14',title:'Тихая улица, 14',author:'Вера Громова',year:2024,pages:296,pub:'Читариум Издат',g:['thriller','detective'],c:['#C0392B','#2B2238'],r:4.5,n:960,w:88,dl:false,a:['dronov',512,20],
+  d:'Новая соседка замечает, что в доме напротив каждую ночь в одно и то же время гаснет свет — ровно на четыре минуты. Чем больше она узнаёт, тем меньше уверена, что наблюдает именно она.'},
+ {slug:'malenkie-privychki',title:'Маленькие привычки, большие перемены',author:'Илья Ветров',year:2021,pages:240,pub:'Ясный путь',g:['psychology','nonfiction'],c:['#3DDC97','#14B8C4'],r:4.3,n:2210,w:64,dl:true,a:['belov',318,12],
+  d:'Практичная книга о том, как менять жизнь без героических усилий: по пять минут в день. Автор разбирает, почему мы бросаем начатое, и предлагает простые упражнения, которые работают в любом возрасте.'},
+ {slug:'kak-ustroena-kompaniya',title:'Как устроена компания',author:'Ольга Таран',year:2020,pages:288,pub:'Ясный путь',g:['business','nonfiction'],c:['#34495E','#FFC94D'],r:4.1,n:740,w:31,dl:true,a:null,
+  d:'Понятное объяснение того, как работает бизнес изнутри: от первой идеи до отчёта для инвесторов. Без сложных терминов, с живыми примерами из небольших компаний.'},
+ {slug:'hroniki-novgoroda',title:'Хроники древнего Новгорода',author:'Павел Рябинин',year:2019,pages:356,pub:'Летопись',g:['history','nonfiction'],c:['#8E5B3E','#FFC94D'],r:4.4,n:510,w:22,dl:true,a:['vishnevskaya',540,16],
+  d:'Как жил вольный город на Волхове: торговля, вече, берестяные грамоты и повседневность горожан. Увлекательный рассказ историка, основанный на археологических находках.'},
+ {slug:'zhizn-sredi-zvyozd',title:'Жизнь среди звёзд',author:'Нина Ланская',year:2022,pages:304,pub:'Летопись',g:['bio','scifi'],c:['#2B8A9E','#7B5CFF'],r:4.2,n:430,w:18,dl:false,a:['svetlova',466,15],
+  d:'Биография вымышленного астронома Софьи Орловой, открывшей комету в восемнадцать лет и посвятившей жизнь наблюдению неба. Книга о призвании и упорстве.'},
+ {slug:'drakon-boyalsya-temnoty',title:'Дракон, который боялся темноты',author:'Ксения Лисицына',year:2023,pages:64,pub:'Солнечный зайчик',g:['kids','fantasy'],c:['#FFC94D','#FF6B6B'],r:4.9,n:880,w:74,dl:true,a:['svetlova',38,6],
+  d:'Маленький дракон Огонёк умеет дышать пламенем, но очень боится темноты. Добрая сказка для чтения перед сном о том, как друзья помогают справиться со страхом.'},
+ {slug:'stihi-u-okna',title:'Стихи у окна',author:'Тимур Алеев',year:2021,pages:120,pub:'Северный ветер',g:['poetry'],c:['#D9608F','#FFC94D'],r:4.0,n:210,w:9,dl:true,a:['kotova',92,8],
+  d:'Сборник лирики о городе, дожде и людях, которых мы встречаем в транспорте. Короткие стихотворения, которые хочется перечитывать.'},
+ {slug:'pesn-solyanyh-vetrov',title:'Песнь соляных ветров',author:'Мира Северова',year:2024,pages:488,pub:'Читариум Издат',g:['fantasy'],c:['#FF6B6B','#FFC94D'],r:4.7,n:690,w:91,dl:true,a:['korneev',812,26],
+  d:'Продолжение «Города без карт». Лея и её друзья отправляются к соляным пустошам, где ветер хранит песни исчезнувших народов.'},
+ {slug:'voyna-i-mir',title:'Война и мир',author:'Лев Толстой',year:1869,pages:1300,pub:'Классика навсегда',g:['classic','novel','history'],c:['#B07A2A','#2E4A9E'],r:4.7,n:5120,w:57,dl:true,a:['vishnevskaya',3720,60],
+  d:'Роман-эпопея о русском обществе в эпоху наполеоновских войн. Судьбы Пьера Безухова, Андрея Болконского и Наташи Ростовой переплетаются с большой историей страны.'},
+ {slug:'prestuplenie-i-nakazanie',title:'Преступление и наказание',author:'Фёдор Достоевский',year:1866,pages:672,pub:'Классика навсегда',g:['classic','novel'],c:['#4A4458','#C0392B'],r:4.8,n:6340,w:62,dl:true,a:['dronov',1290,42],
+  d:'Бедный студент Раскольников решается на преступление, чтобы проверить собственную теорию. Психологический роман о совести, вине и пути к прощению.'},
+ {slug:'evgeniy-onegin',title:'Евгений Онегин',author:'Александр Пушкин',year:1833,pages:240,pub:'Классика навсегда',g:['classic','poetry','novel'],c:['#E8508A','#7B5CFF'],r:4.7,n:4210,w:40,dl:true,a:['kotova',290,8],
+  d:'Роман в стихах о скучающем столичном денди, искренней Татьяне Лариной и выборе, который нельзя исправить. «Энциклопедия русской жизни» своего времени.'},
+ {slug:'myortvye-dushi',title:'Мёртвые души',author:'Николай Гоголь',year:1842,pages:352,pub:'Классика навсегда',g:['classic','novel'],c:['#3DAA7A','#4A4458'],r:4.5,n:3010,w:28,dl:true,a:['vishnevskaya',705,22],
+  d:'Предприимчивый Чичиков объезжает помещиков, скупая у них умерших крестьян. Сатирическая поэма в прозе, полная ярких и смешных характеров.'},
+ {slug:'otcy-i-deti',title:'Отцы и дети',author:'Иван Тургенев',year:1862,pages:224,pub:'Классика навсегда',g:['classic','novel'],c:['#2B8A9E','#3DDC97'],r:4.4,n:2760,w:24,dl:true,a:null,
+  d:'Молодой нигилист Базаров приезжает в гости к другу и сталкивается с миром старших поколений. Роман о спорах, убеждениях и любви, которая сильнее теорий.'},
+ {slug:'vishnevyy-sad',title:'Вишнёвый сад',author:'Антон Чехов',year:1904,pages:96,pub:'Классика навсегда',g:['classic'],c:['#F2A0B6','#D9608F'],r:4.3,n:1980,w:15,dl:true,a:['vishnevskaya',150,4],
+  d:'Пьеса о семье, которая теряет родовое имение и любимый сад. Грустная и смешная одновременно, о прощании с прошлым и страхе перед будущим.'},
+ {slug:'geroy-nashego-vremeni',title:'Герой нашего времени',author:'Михаил Лермонтов',year:1840,pages:224,pub:'Классика навсегда',g:['classic','novel','adventure'],c:['#1E1B2E','#7B5CFF'],r:4.6,n:3540,w:33,dl:true,a:['korneev',398,5],
+  d:'Пять повестей о Григории Печорине — офицере, который ищет смысл жизни и не находит покоя. Первый русский психологический роман.'},
+ {slug:'anna-karenina',title:'Анна Каренина',author:'Лев Толстой',year:1877,pages:864,pub:'Классика навсегда',g:['classic','novel'],c:['#C0392B','#B07A2A'],r:4.6,n:4400,w:45,dl:true,a:['svetlova',2310,40],
+  d:'История страстной любви, бросившей вызов светскому обществу, и параллельная история Левина, ищущего простое счастье. Один из величайших романов мировой литературы.'},
+ {slug:'ostrov-sokrovishch',title:'Остров сокровищ',author:'Роберт Льюис Стивенсон',year:1883,pages:256,pub:'Мир приключений',g:['adventure','classic','kids'],c:['#F08A24','#14B8C4'],r:4.6,n:2870,w:52,dl:true,a:['kotova',418,34],
+  d:'Юный Джим Хокинс находит карту пиратского клада и отправляется в плавание. Классика приключений с одноногим Джоном Сильвером, самым обаятельным злодеем морей.'},
+ {slug:'sobaka-baskerviley',title:'Собака Баскервилей',author:'Артур Конан Дойл',year:1902,pages:224,pub:'Мир приключений',g:['detective','classic'],c:['#2E4A9E','#3DDC97'],r:4.7,n:3390,w:58,dl:true,a:['dronov',372,15],
+  d:'Шерлок Холмс и доктор Ватсон расследуют загадку древнего проклятия рода Баскервилей. Туманные болота, таинственный вой и одно из самых известных дел великого сыщика.'},
+ {slug:'mashina-vremeni',title:'Машина времени',author:'Герберт Уэллс',year:1895,pages:128,pub:'Мир приключений',g:['scifi','classic'],c:['#14B8C4','#FFC94D'],r:4.3,n:1650,w:20,dl:true,a:['belov',212,16],
+  d:'Изобретатель отправляется в далёкое будущее и видит, во что превратилось человечество. Повесть, с которой началась вся фантастика о путешествиях во времени.'},
+ {slug:'gordost-i-predubezhdenie',title:'Гордость и предубеждение',author:'Джейн Остин',year:1813,pages:416,pub:'Классика навсегда',g:['novel','classic'],c:['#E8508A','#FFC94D'],r:4.7,n:3980,w:49,dl:true,a:['svetlova',690,61],
+  d:'Остроумная Элизабет Беннет и гордый мистер Дарси с первой встречи не выносят друг друга. Роман о любви, первых впечатлениях и умении признавать ошибки.'},
+ {slug:'alisa',title:'Алиса в Стране чудес',author:'Льюис Кэрролл',year:1865,pages:160,pub:'Солнечный зайчик',g:['kids','fantasy','classic'],c:['#7B5CFF','#3DDC97'],r:4.6,n:2540,w:38,dl:true,a:['svetlova',165,12],
+  d:'Алиса бежит за Белым Кроликом и попадает в страну, где всё не так, как кажется. Сказка, полная игры слов и логических чудес, которую любят и дети, и взрослые.'},
+ {slug:'graf-monte-kristo',title:'Граф Монте-Кристо',author:'Александр Дюма',year:1844,pages:1250,pub:'Мир приключений',g:['adventure','classic','novel'],c:['#1E1B2E','#F08A24'],r:4.8,n:4890,w:69,dl:true,a:['korneev',2860,117],
+  d:'Несправедливо заключённый в замок Иф моряк Эдмон Дантес бежит, находит сокровище и возвращается в Париж под новым именем. Великая история о мести и милосердии.'}
+];
+const AVA_COLORS=['#FF6B6B','#7B5CFF','#3DAA7A','#F08A24','#2E4A9E','#E8508A','#14B8C4'];
+const BASE_REVIEWS=[
+ ['gorod-bez-kart','Ольга К.',5,'Прочитала за два вечера. Мир города описан так, что хочется самой бродить по этим улицам. Отдельное спасибо за финал — без лишнего пафоса, но очень трогательно.',true,false,48,'2026-10-10'],
+ ['gorod-bez-kart','Дмитрий',4,'Хорошая книга, особенно первая половина. Середина немного затянута, но персонажи живые. Аудиоверсия с Корнеевым — отдельное удовольствие.',true,false,21,'2026-10-08'],
+ ['gorod-bez-kart','Татьяна Ивановна',5,'Купила внуку, а прочитала сама. Оказывается, мне в мои 72 года тоже интересно фэнтези! В конце выясняется, что сам город и есть потерянная сестра Леи.',true,true,33,'2026-10-06'],
+ ['prestuplenie-i-nakazanie','Николай П.',5,'Перечитал спустя тридцать лет после школы — совсем другая книга. В юности видел детектив, теперь вижу историю о совести.',true,false,64,'2026-10-11'],
+ ['signal-s-evropy','Артём',5,'Давно так не боялся читать ночью. Атмосфера станции передана отлично, научная часть правдоподобная.',true,false,29,'2026-10-09'],
+ ['tihaya-ulica-14','Ирина',4,'Затягивает с первой страницы. Развязку угадала примерно на середине, но всё равно было интересно, как автор к ней подведёт.',true,false,17,'2026-10-11'],
+ ['drakon-boyalsya-temnoty','Мама двоих',5,'Читаем каждый вечер уже неделю. Младшая теперь сама выключает свет и говорит, что она как Огонёк.',true,false,52,'2026-10-07'],
+ ['ostrov-sokrovishch','Валентин Сергеевич',5,'Книга моего детства. Слушал аудиоверсию в поезде — Анна Котова читает замечательно, разными голосами.',true,false,26,'2026-10-05'],
+ ['malenkie-privychki','Светлана',4,'Простые советы, но они действительно работают. Начала с пяти минут зарядки, теперь гуляю каждый день по часу.',true,false,38,'2026-10-04'],
+ ['voyna-i-mir','Александр',5,'Трудно начать, невозможно закончить. Слушал 62 часа в машине, жалко было расставаться с героями.',true,false,41,'2026-10-03'],
+ ['sobaka-baskerviley','Мария',5,'Классический английский детектив. Дронов читает так, что мурашки по коже на болотах.',true,false,19,'2026-10-10'],
+ ['pesn-solyanyh-vetrov','Ольга К.',5,'Продолжение даже лучше первой книги. Мир расширился, а герои повзрослели.',true,false,22,'2026-10-12'],
+ ['graf-monte-kristo','Евгений',5,'Тысяча страниц пролетают как одна. Лучшая книга о мести, которую я знаю.',true,false,35,'2026-10-02'],
+ ['kak-ustroena-kompaniya','Роман',3,'Для новичков хорошо, но если вы хоть немного в теме, многое будет знакомо.',true,false,8,'2026-10-01']
+];
+const FORMATS=[
+ ['EPUB','Для большинства телефонов и электронных книг'],
+ ['FB2','Популярный формат для читалок и приложений'],
+ ['PDF','Для печати и чтения на компьютере'],
+ ['MOBI','Для старых моделей Kindle'],
+ ['AZW3','Для современных Kindle'],
+ ['TXT','Просто текст — откроется где угодно'],
+ ['DOCX','Для Microsoft Word']
+];
+
+/* ================== HELPERS ================== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s).toLowerCase().replace(/ё/g,'е');
+const hash=s=>{let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const rng=seed=>()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const fmtNum=n=>n.toLocaleString('ru-RU');
+const fmtAvg=n=>n.toFixed(1).replace('.',',');
+const fmtDur=sec=>{const m=Math.round(sec/60),h=Math.floor(m/60),mm=m%60;return h?`${h} ч ${mm} мин`:`${mm} мин`};
+const fmtTime=s=>{s=Math.max(0,Math.floor(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${ss}`:`${m}:${ss}`};
+const fmtDate=d=>new Date(d).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+const plural=(n,a,b,c)=>{const m=n%10,h=n%100;return m===1&&h!==11?a:m>=2&&m<=4&&(h<10||h>=20)?b:c};
+const store={get(k,d){try{const v=localStorage.getItem('chitarium:'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('chitarium:'+k,JSON.stringify(v))}catch(e){}}};
+const genre=id=>GENRES.find(g=>g.id===id);
+const bySlug=s=>BOOKS.find(b=>b.slug===s);
+
+/* ================== STATE ================== */
+const S={
+ user:store.get('user',null),
+ myRatings:store.get('ratings',{}),
+ myReviews:store.get('reviews',[]),
+ helpful:store.get('helpful',{}),
+ events:store.get('events',{}),
+ progress:store.get('progress',{}),
+ settings:Object.assign({font:'m',contrast:'off',simple:'off',reduce:'off',bigplayer:'off',theme:'auto'},store.get('settings',{})),
+ q:'',genres:new Set(),shown:12
+};
+
+/* chapters & distributions */
+BOOKS.forEach((b,i)=>{
+ b.i=i;
+ const r=rng(hash(b.slug));
+ const d=[0,0,0,0,0];
+ for(let k=0;k<b.n;k++){const x=b.r+(r()+r()+r()-1.5)*1.15;d[Math.round(Math.min(5,Math.max(1,x)))-1]++}
+ b.dist=d;
+ if(b.a){
+  const [nar,mins,cnt]=b.a, total=mins*60, ws=[];
+  for(let k=0;k<cnt;k++)ws.push(.7+r()*.6);
+  const sum=ws.reduce((x,y)=>x+y,0);
+  b.audio={narrator:nar,chapters:ws.map((w,k)=>({title:`Глава ${k+1}`,dur:Math.round(total*w/sum)}))};
+  b.audio.total=b.audio.chapters.reduce((x,c)=>x+c.dur,0);
+ }
+});
+function stats(b){
+ const d=b.dist.slice();const mine=S.myRatings[b.slug];if(mine)d[mine-1]++;
+ const v=d.reduce((x,y)=>x+y,0),sum=d.reduce((x,y,i)=>x+y*(i+1),0);
+ return {dist:d,count:v,avg:sum/v};
+}
+function globalAvg(){let s=0,v=0;BOOKS.forEach(b=>{const st=stats(b);s+=st.avg*st.count;v+=st.count});return s/v}
+function bayes(b,C){const st=stats(b),m=20;return st.count/(st.count+m)*st.avg+m/(st.count+m)*C}
+function reviewsOf(slug){
+ const base=BASE_REVIEWS.filter(r=>r[0]===slug).map((r,i)=>({id:`b-${slug}-${i}`,slug,name:r[1],rating:r[2],text:r[3],finished:r[4],spoiler:r[5],helpful:r[6],date:r[7]}));
+ return base.concat(S.myReviews.filter(r=>r.slug===slug));
+}
+function allReviews(){return BOOKS.flatMap(b=>reviewsOf(b.slug))}
+function weekly(b){
+ const e=S.events[b.slug]||{};
+ return b.w+(e.listen||0)+(e.download||0)+.5*(e.view||0)+(S.myRatings[b.slug]>=4?3:0)+2*S.myReviews.filter(r=>r.slug===b.slug).length;
+}
+function weeklyTop(){return BOOKS.slice().sort((a,b)=>weekly(b)-weekly(a)).slice(0,10)}
+function track(slug,type){const e=S.events[slug]||(S.events[slug]={});e[type]=(e[type]||0)+1;store.set('events',S.events)}
+
+/* ================== RENDER BITS ================== */
+let svgId=0;
+function coverSVG(b){
+ const id='g'+(svgId++), [c1,c2]=b.c, p=b.i%5;
+ const words=b.title.split(' ');const lines=[];let cur='';
+ words.forEach(w=>{if((cur+' '+w).trim().length>11&&cur){lines.push(cur);cur=w}else cur=(cur+' '+w).trim()});lines.push(cur);
+ const longest=Math.max(...lines.map(l=>l.length));const fs=Math.min(30,Math.floor(170/(longest*.66)));
+ const pat=[
+  `<circle cx="160" cy="70" r="70" fill="#fff" opacity=".14"/><circle cx="40" cy="250" r="48" fill="#fff" opacity=".1"/>`,
+  `<g opacity=".14" stroke="#fff" stroke-width="10">${[0,1,2,3,4,5,6].map(k=>`<path d="M${-60+k*45} 300L${60+k*45} 0"/>`).join('')}</g>`,
+  `<g fill="none" stroke="#fff" stroke-width="3" opacity=".25">${[0,1,2,3,4].map(k=>`<path d="M0 ${40+k*22}q25-18 50 0t50 0 50 0 50 0"/>`).join('')}</g>`,
+  `<g fill="#fff" opacity=".35">${[[30,30],[150,50],[90,20],[170,120],[20,110],[120,95]].map(([x,y],k)=>`<circle cx="${x}" cy="${y}" r="${1.5+k%3}"/>`).join('')}</g><circle cx="150" cy="60" r="22" fill="#FFC94D" opacity=".85"/>`,
+  `<path d="M-20 160A120 120 0 0 1 220 160" fill="none" stroke="#fff" stroke-width="22" opacity=".16"/><path d="M-20 200A120 120 0 0 1 220 200" fill="none" stroke="#fff" stroke-width="8" opacity=".12"/>`
+ ][p];
+ const ty=150-((lines.length-1)*fs*1.15)/2+(p===3?20:0);
+ return `<svg viewBox="0 0 200 300" role="img" aria-label="Обложка книги «${esc(b.title)}»"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
+ <rect width="200" height="300" fill="url(#${id})"/>${pat}<rect x="0" y="0" width="7" height="300" fill="#000" opacity=".12"/>
+ <g font-family="Unbounded,system-ui,sans-serif" font-weight="800" fill="#fff" text-anchor="middle" font-size="${fs}">${lines.map((l,k)=>`<text x="100" y="${ty+k*fs*1.15}">${esc(l)}</text>`).join('')}</g>
+ <text x="100" y="272" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="600" fill="#fff" opacity=".9">${esc(b.author)}</text></svg>`;
+}
+const cover=b=>`<div class="cover">${coverSVG(b)}</div>`;
+const stars=(avg,label=true)=>`<span class="stars" ${label?`role="img" aria-label="Оценка ${fmtAvg(avg)} из 5"`:'aria-hidden="true"'}><i style="width:${avg/5*100}%"></i></span>`;
+const ratingLine=b=>{const s=stats(b);return `<div class="rating-line">${stars(s.avg)}<b>${fmtAvg(s.avg)}</b><small>${fmtNum(s.count)} ${plural(s.count,'оценка','оценки','оценок')}</small></div>`};
+const ava=(name,color)=>`<span class="ava" style="background:${color||AVA_COLORS[hash(name)%AVA_COLORS.length]}" aria-hidden="true">${esc(name.trim()[0]||'?')}</span>`;
+function hl(text,q){
+ if(!q)return esc(text);const i=norm(text).indexOf(norm(q));if(i<0)return esc(text);
+ return esc(text.slice(0,i))+'<mark>'+esc(text.slice(i,i+q.length))+'</mark>'+esc(text.slice(i+q.length));
+}
+function toast(msg,warn){
+ const t=document.createElement('div');t.className='toast'+(warn?' warn':'');t.textContent=msg;$('#toasts').append(t);
+ setTimeout(()=>t.remove(),6500);
+}
+
+/* ================== SECTIONS ================== */
+function renderHero(){
+ const b=weeklyTop()[0];
+ $('#heroBg').style.setProperty('--c1',b.c[0]);$('#heroBg').style.setProperty('--c2',b.c[1]);
+ $('#hero').innerHTML=`<div>
+  <span class="hero-label">⭐ Книга недели</span>
+  <h1 id="heroTitle">${esc(b.title)}</h1>
+  <p class="author">${esc(b.author)}, ${b.year}</p>
+  ${ratingLine(b)}
+  <p class="desc">${esc(b.d)}</p>
+  <div class="actions">
+   <button class="btn btn-primary" data-open="${b.slug}">Подробнее о книге</button>
+   ${b.audio?`<button class="btn btn-coral" data-play="${b.slug}">▶ Слушать · ${fmtDur(b.audio.total)}</button>`:''}
+   ${b.dl?`<button class="btn btn-ghost" data-open="${b.slug}" data-jump="download">⬇ Скачать</button>`:''}
+  </div></div>
+  <div class="hero-cover"><span class="badge-one" aria-hidden="true"><span>№<b>1</b>недели</span></span>${cover(b)}</div>`;
+}
+function renderTop(){
+ $('#topRail').innerHTML=weeklyTop().map((b,i)=>`<button class="top-item" data-open="${b.slug}" aria-label="${i+1} место: ${esc(b.title)}">
+  <span class="num" aria-hidden="true">${i+1}</span>${cover(b)}<h3>${esc(b.title)}</h3><p>${esc(b.author)}</p>${ratingLine(b)}</button>`).join('');
+}
+function renderGenres(){
+ $('#genreList').innerHTML=GENRES.map(g=>{const n=BOOKS.filter(b=>b.g.includes(g.id)).length;
+  return `<button class="genre" style="--g:${g.color}" data-genre="${g.id}" aria-pressed="${S.genres.has(g.id)}"><span class="ic" aria-hidden="true">${g.icon}</span>${g.name} <small>${n}</small></button>`}).join('');
+}
+function filtered(){
+ const minR=+$('#fRating').value, yr=$('#fYear').value, au=$('#fAudio').checked, dl=$('#fDl').checked, sort=$('#fSort').value, q=norm(S.q.trim()), C=globalAvg();
+ let list=BOOKS.filter(b=>{
+  if(q&&![b.title,b.author,b.audio?NARRATORS[b.audio.narrator].name:'',...b.g.map(g=>genre(g).name)].some(t=>norm(t).includes(q)))return false;
+  if(S.genres.size&&!b.g.some(g=>S.genres.has(g)))return false;
+  if(minR&&stats(b).avg<minR)return false;
+  if(yr==='old'&&b.year>=1900)return false;if(yr==='xx'&&(b.year<1900||b.year>1999))return false;if(yr==='new'&&b.year<2000)return false;
+  if(au&&!b.audio)return false;if(dl&&!b.dl)return false;return true;
+ });
+ const cmp={rating:(a,b)=>bayes(b,C)-bayes(a,C),popular:(a,b)=>weekly(b)-weekly(a),new:(a,b)=>b.year-a.year,title:(a,b)=>a.title.localeCompare(b.title,'ru')}[sort];
+ return list.sort(cmp);
+}
+function tile(b){
+ return `<button class="tile" data-open="${b.slug}">${cover(b)}<h3>${hl(b.title,S.q.trim())}</h3><p class="by">${hl(b.author,S.q.trim())}</p>${ratingLine(b)}
+  <span class="badges">${b.g.slice(0,1).map(g=>`<span class="chip g" style="--g:${genre(g).color}">${genre(g).name}</span>`).join('')}${b.audio?'<span class="chip">🎧 Аудио</span>':''}${b.dl?'<span class="chip">⬇ Скачать</span>':''}</span></button>`;
+}
+function renderCatalog(){
+ const list=filtered();
+ $('#catCount').textContent=`${list.length} ${plural(list.length,'книга','книги','книг')} в подборке`;
+ const aq=$('#activeQ');
+ if(S.q.trim()||S.genres.size){
+  aq.hidden=false;
+  aq.innerHTML=`${S.q.trim()?`Поиск: <b>«${esc(S.q.trim())}»</b>`:''} ${[...S.genres].map(g=>`<span class="chip g" style="--g:${genre(g).color}">${genre(g).name}</span>`).join(' ')} <button class="linkish" id="clearAll">Сбросить</button>`;
+ } else aq.hidden=true;
+ if(!list.length){
+  const C=globalAvg(),rec=BOOKS.slice().sort((a,b)=>bayes(b,C)-bayes(a,C)).slice(0,4);
+  $('#catalogGrid').innerHTML=`<div class="empty" style="grid-column:1/-1"><h3>Ничего не нашлось</h3><p>Проверьте написание или уберите часть фильтров. А пока — книги, которые нравятся читателям больше всего:</p>
+   <div class="grid" style="margin-top:1.5rem;text-align:left">${rec.map(tile).join('')}</div><button class="btn btn-primary" id="clearAll2" style="margin-top:1.5rem">Сбросить фильтры</button></div>`;
+  $('#moreBtn').hidden=true;return;
+ }
+ $('#catalogGrid').innerHTML=list.slice(0,S.shown).map(tile).join('');
+ $('#moreBtn').hidden=list.length<=S.shown;
+}
+function renderRating(){
+ const C=globalAvg(),list=BOOKS.map(b=>({b,s:bayes(b,C),st:stats(b)})).sort((x,y)=>y.s-x.s).slice(0,10);
+ $('#rankList').innerHTML=list.map(({b,s,st},i)=>`<li><span class="pos">${i+1}</span><div style="width:3.2rem">${cover(b)}</div>
+  <div><button class="t" data-open="${b.slug}">${esc(b.title)}</button><div class="meta">${esc(b.author)} · ${fmtNum(st.count)} ${plural(st.count,'оценка','оценки','оценок')} · ${reviewsOf(b.slug).length} ${plural(reviewsOf(b.slug).length,'отзыв','отзыва','отзывов')}</div></div>
+  <div class="score">${stars(st.avg)} <b>${fmtAvg(st.avg)}</b><div class="bar"><span style="width:${s/5*100}%"></span></div></div></li>`).join('');
+}
+function renderAudio(){
+ $('#audioList').innerHTML=BOOKS.filter(b=>b.audio).sort((a,b)=>weekly(b)-weekly(a)).map(b=>{const n=NARRATORS[b.audio.narrator],pr=S.progress[b.slug];
+  return `<div class="aitem"><div>${cover(b)}</div><div><button class="t" data-open="${b.slug}" data-jump="audio"><h3>${esc(b.title)}</h3></button>
+   <p>Читает ${esc(n.name)}</p><p>⏱ ${fmtDur(b.audio.total)} · ${b.audio.chapters.length} ${plural(b.audio.chapters.length,'глава','главы','глав')}${pr?` · вы на главе ${pr.ch+1}`:''}</p></div>
+   <button class="play-round" data-play="${b.slug}" aria-label="${pr?'Продолжить':'Слушать'} «${esc(b.title)}»">▶</button></div>`}).join('');
+}
+function renderFeed(){
+ const list=allReviews().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
+ $('#reviewFeed').innerHTML=list.map(r=>{const b=bySlug(r.slug);return `<article class="rcard"><header>${ava(r.name)}<div><b>${esc(r.name)}</b><small>${fmtDate(r.date)}</small></div></header>
+  ${stars(r.rating)}<p class="${r.spoiler?'spoiler-feed':''}">${r.spoiler?'<i>Отзыв содержит спойлеры — откройте книгу, чтобы прочитать</i>':esc(r.text.length>220?r.text.slice(0,220)+'…':r.text)}</p>
+  <button class="on" data-open="${b.slug}" data-jump="reviews">о книге «${esc(b.title)}»</button></article>`}).join('');
+}
+function renderAll(){renderHero();renderTop();renderGenres();renderCatalog();renderRating();renderAudio();renderFeed()}
+
+/* ================== BOOK DIALOG ================== */
+let current=null, revSort='helpful', pickRating=0;
+function openBook(slug,jump){
+ const b=bySlug(slug);if(!b)return;current=slug;pickRating=S.myRatings[slug]||0;
+ track(slug,'view');
+ renderBook();
+ const dlg=$('#bookDlg');if(!dlg.open)dlg.showModal();
+ history.replaceState(null,'','#book/'+slug);
+ dlg.scrollTop=0;$('#bookBody').scrollTop=0;
+ if(jump){const el=$('#blk-'+jump);el&&setTimeout(()=>el.scrollIntoView({block:'start'}),50)}
+}
+function renderBook(){
+ const b=bySlug(current),st=stats(b),C=globalAvg(),max=Math.max(...st.dist);
+ const revs=reviewsOf(b.slug).sort({helpful:(x,y)=>y.helpful-x.helpful,new:(x,y)=>y.date.localeCompare(x.date),high:(x,y)=>y.rating-x.rating,low:(x,y)=>x.rating-y.rating}[revSort]);
+ const similar=BOOKS.filter(x=>x.slug!==b.slug&&(x.author===b.author||x.g.some(g=>b.g.includes(g)))).sort((x,y)=>bayes(y,C)-bayes(x,C)).slice(0,6);
+ const n=b.audio&&NARRATORS[b.audio.narrator], pr=S.progress[b.slug], my=S.myRatings[b.slug];
+ const long=b.d.length>260;
+ $('#bookBody').innerHTML=`
+ <div class="book-top"><div>${cover(b)}</div><div>
+  <div class="badges">${b.g.map(g=>`<span class="chip g" style="--g:${genre(g).color}">${genre(g).icon} ${genre(g).name}</span>`).join('')}</div>
+  <h2 id="bookTitle">${esc(b.title)}</h2><p class="author">${esc(b.author)}</p>
+  ${ratingLine(b)}
+  <p class="book-desc ${long?'clamped':''}" id="bdesc">${esc(b.d)}</p>${long?'<button class="linkish" id="moreDesc">Читать полностью</button>':''}
+  <dl class="facts"><div><dt>Год</dt><dd>${b.year}</dd></div><div><dt>Страниц</dt><dd>${fmtNum(b.pages)}</dd></div><div><dt>Язык</dt><dd>Русский</dd></div><div><dt>Издательство</dt><dd>${esc(b.pub)}</dd></div>${b.audio?`<div><dt>Аудиокнига</dt><dd>${fmtDur(b.audio.total)}</dd></div>`:''}</dl>
+  <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+   ${b.audio?`<button class="btn btn-coral" data-play="${b.slug}">▶ ${pr?'Продолжить слушать':'Слушать'}</button>`:''}
+   ${b.dl?`<button class="btn btn-primary" data-scroll="download">⬇ Скачать книгу</button>`:''}
+   <button class="btn btn-ghost" id="shareBtn">🔗 Поделиться</button>
+  </div></div></div>
+
+ <section class="block" id="blk-rate"><h3>Оценки читателей</h3>
+  <div style="display:flex;flex-wrap:wrap;gap:2rem;align-items:center">
+   <div><div style="font-family:var(--font-head);font-size:3rem;font-weight:800;line-height:1">${fmtAvg(st.avg)}</div>${stars(st.avg)}<div style="color:var(--muted);font-size:.9rem;margin-top:.3rem">${fmtNum(st.count)} ${plural(st.count,'оценка','оценки','оценок')}</div></div>
+   <div class="hist" style="flex:1 1 220px">${[5,4,3,2,1].map(v=>`<div><span>${v} ★</span><span class="track"><span style="width:${st.dist[v-1]/max*100}%"></span></span><span style="color:var(--muted)">${fmtNum(st.dist[v-1])}</span></div>`).join('')}</div>
+  </div>
+  <div style="margin-top:1.25rem"><b>${my?'Ваша оценка':'Оцените книгу'}</b><div class="rate-pick" role="radiogroup" aria-label="Ваша оценка">${[1,2,3,4,5].map(v=>`<button role="radio" aria-checked="${my===v}" aria-label="${v} из 5" data-rate="${v}" class="${my>=v?'on':''}">★</button>`).join('')}</div></div>
+ </section>
+
+ ${b.audio?`<section class="block" id="blk-audio"><h3>Аудиокнига</h3>
+  <div class="narrator">${ava(n.name,n.color)}<div><b>Читает ${esc(n.name)}</b><div style="color:var(--muted);font-size:.9rem">${esc(n.bio)}</div></div></div>
+  <p style="margin:0 0 1rem"><b>Общая длительность:</b> ${fmtDur(b.audio.total)} · ${b.audio.chapters.length} ${plural(b.audio.chapters.length,'глава','главы','глав')}${pr?` · вы остановились на главе ${pr.ch+1}, ${fmtTime(pr.pos)}`:''}</p>
+  <ol class="chapters">${b.audio.chapters.map((c,i)=>`<li><button data-play="${b.slug}" data-ch="${i}" class="${pr&&pr.ch===i?'now':''}"><span>▶ ${c.title}</span><span>${fmtTime(c.dur)}</span></button></li>`).join('')}</ol>
+ </section>`:''}
+
+ <section class="block" id="blk-download"><h3>Скачать книгу</h3>
+  ${b.dl?`<p style="margin-top:-.4rem;color:var(--muted)">Выберите формат. Не знаете, какой нужен? Для телефона берите EPUB, для печати — PDF.</p>
+  <div class="formats">${FORMATS.map(([f,h])=>`<button class="fmt" data-dl="${f}"><b>${f}</b><span>${h}</span></button>`).join('')}</div>`
+  :`<div class="notice">Скачивание этой книги недоступно по условиям лицензии правообладателя.${b.audio?' Но её можно послушать в аудиоверсии.':''}</div>`}
+ </section>
+
+ <section class="block" id="blk-reviews"><h3>Отзывы (${revs.length})</h3>
+  ${S.user?`<form class="review-form" id="revForm" novalidate>
+   <div><b>Ваш отзыв</b> <span class="hint">— оценка:</span> <span class="rate-pick" id="formStars">${[1,2,3,4,5].map(v=>`<button type="button" data-frate="${v}" class="${pickRating>=v?'on':''}" aria-label="${v} из 5">★</button>`).join('')}</span></div>
+   <label class="sr-only" for="revText">Текст отзыва</label>
+   <textarea id="revText" maxlength="3000" placeholder="Что понравилось, что нет? Кому бы вы посоветовали эту книгу?"></textarea>
+   <div class="hint" id="revHint">От 50 до 3000 символов. Сейчас: 0</div>
+   <div><label class="cb"><input type="checkbox" id="revFin" checked> Прочитал(а) полностью</label><label class="cb"><input type="checkbox" id="revSp"> Есть спойлеры</label></div>
+   <div><button class="btn btn-primary" type="submit">Опубликовать отзыв</button></div>
+  </form>`:`<div class="notice" style="margin-bottom:1.25rem">Чтобы оставить отзыв и оценку, <button class="linkish" data-login>войдите</button>. Это быстро — понадобятся только имя и email.</div>`}
+  ${revs.length?`<label style="display:inline-flex;gap:.5rem;align-items:center">Сначала
+   <select id="revSort" style="min-height:2.5rem;border-radius:8px;border:2px solid var(--line);background:var(--bg)"><option value="helpful">самые полезные</option><option value="new">новые</option><option value="high">с высокой оценкой</option><option value="low">с низкой оценкой</option></select></label>
+   <div>${revs.map(r=>`<article class="rev"><header>${ava(r.name)}<div><b>${esc(r.name)}</b><small>${fmtDate(r.date)}${r.finished?' · прочитал(а) полностью':''}</small></div></header>
+    <div style="margin-top:.5rem">${stars(r.rating)}</div>
+    ${r.spoiler?'<div class="chip" style="margin-top:.5rem">⚠ Спойлер — нажмите на текст, чтобы показать</div>':''}
+    <p class="${r.spoiler?'spoiler':''}" ${r.spoiler?'tabindex="0" role="button" aria-label="Показать отзыв со спойлером"':''}>${esc(r.text)}</p>
+    <div class="actions"><button class="btn btn-ghost btn-sm" data-helpful="${r.id}" aria-pressed="${!!S.helpful[r.id]}">👍 Полезно · ${r.helpful+(S.helpful[r.id]?1:0)}</button><button class="btn btn-ghost btn-sm" data-report="${r.id}">Пожаловаться</button></div></article>`).join('')}</div>`
+  :'<p style="color:var(--muted)">Отзывов пока нет. Станьте первым!</p>'}
+ </section>
+
+ ${similar.length?`<section class="block"><h3>Похожие книги</h3><div class="similar">${similar.map(x=>`<button class="tile" data-open="${x.slug}">${cover(x)}<h3 style="font-size:.95rem">${esc(x.title)}</h3><p class="by">${esc(x.author)}</p></button>`).join('')}</div></section>`:''}`;
+ const rs=$('#revSort');if(rs)rs.value=revSort;
+}
+function closeBook(){if(location.hash.startsWith('#book/'))history.replaceState(null,'',location.pathname+location.search);current=null}
+
+/* ================== PLAYER ================== */
+const P={slug:null,ch:0,pos:0,playing:false,speed:1,sleepAt:null,sleepCh:false,lastSave:0};
+function play(slug,ch){
+ const b=bySlug(slug);if(!b||!b.audio)return;
+ if(P.slug!==slug){const pr=S.progress[slug];P.slug=slug;P.ch=pr?pr.ch:0;P.pos=pr?pr.pos:0;track(slug,'listen')}
+ if(ch!=null&&ch!==P.ch){P.ch=ch;P.pos=0}
+ P.playing=true;
+ $('#player').hidden=false;document.body.classList.add('has-player');
+ $('#pCover').innerHTML=coverSVG(b);$('#pTitle').textContent=b.title;
+ $('#pChapter').innerHTML=b.audio.chapters.map((c,i)=>`<option value="${i}">${c.title} · ${fmtTime(c.dur)}</option>`).join('');
+ if('mediaSession' in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:b.title,artist:'Читает '+NARRATORS[b.audio.narrator].name,album:'Читариум'});
+  navigator.mediaSession.setActionHandler('play',()=>{P.playing=true;updP()});navigator.mediaSession.setActionHandler('pause',()=>{P.playing=false;updP()});
+  navigator.mediaSession.setActionHandler('seekbackward',()=>seek(-15));navigator.mediaSession.setActionHandler('seekforward',()=>seek(15));}catch(e){}}
+ updP();saveP(true);
+ if(current===slug)renderBook();
+}
+function seek(d){const b=bySlug(P.slug);if(!b)return;const dur=b.audio.chapters[P.ch].dur;P.pos=Math.min(dur,Math.max(0,P.pos+d));updP();saveP(true)}
+function saveP(force){const now=Date.now();if(!force&&now-P.lastSave<2000)return;P.lastSave=now;S.progress[P.slug]={ch:P.ch,pos:Math.floor(P.pos)};store.set('progress',S.progress)}
+function updP(){
+ const b=bySlug(P.slug);if(!b)return;const c=b.audio.chapters[P.ch],n=NARRATORS[b.audio.narrator];
+ $('#pSub').textContent=`${c.title} · читает ${n.name} · всего ${fmtDur(b.audio.total)}`;
+ $('#pCur').textContent=fmtTime(P.pos);$('#pLeft').textContent='−'+fmtTime(c.dur-P.pos);
+ const sk=$('#pSeek');sk.max=c.dur;if(document.activeElement!==sk)sk.value=P.pos;
+ $('#pChapter').value=P.ch;$('#pPlay').textContent=P.playing?'❚❚':'▶';$('#pPlay').setAttribute('aria-label',P.playing?'Пауза':'Слушать');
+ $('#player').classList.toggle('playing',P.playing);
+}
+setInterval(()=>{
+ if(!P.playing||!P.slug)return;const b=bySlug(P.slug);
+ P.pos+=.25*P.speed;
+ if(P.pos>=b.audio.chapters[P.ch].dur){
+  if(P.sleepCh){P.playing=false;P.sleepCh=false;$('#pSleep').value='0';toast('Таймер сна: воспроизведение остановлено')}
+  if(P.ch<b.audio.chapters.length-1){P.ch++;P.pos=0}else{P.playing=false;P.pos=b.audio.chapters[P.ch].dur;toast('Аудиокнига прослушана до конца')}
+ }
+ if(P.sleepAt&&Date.now()>=P.sleepAt){P.playing=false;P.sleepAt=null;$('#pSleep').value='0';toast('Таймер сна: воспроизведение остановлено')}
+ updP();saveP();
+},250);
+
+/* ================== AUTH ================== */
+function openLogin(){
+ $('#loginBody').innerHTML=S.user?`<h2 style="font-size:1.4rem;margin-bottom:1rem">Профиль</h2><p>Вы вошли как <b>${esc(S.user.name)}</b> (${esc(S.user.email)}).</p><button class="btn btn-ghost" id="logout">Выйти</button>`:
+ `<h2 id="loginTitle" style="font-size:1.4rem;margin-bottom:.5rem">Вход в Читариум</h2><p style="color:var(--muted);margin-top:0">Без пароля: мы пришлём ссылку для входа на почту.</p>
+ <form id="loginForm"><div class="field"><label for="lgName">Ваше имя</label><input id="lgName" required autocomplete="name"></div>
+ <div class="field"><label for="lgMail">Email</label><input id="lgMail" type="email" required autocomplete="email"></div>
+ <button class="btn btn-primary" style="width:100%" type="submit">Получить ссылку для входа</button></form>
+ <p style="text-align:center;color:var(--muted);margin:1.25rem 0 .75rem">или войти через</p>
+ <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-oauth="Google">Google</button><button class="btn btn-ghost btn-sm" data-oauth="VK">VK</button><button class="btn btn-ghost btn-sm" data-oauth="Яндекс">Яндекс</button></div>`;
+ $('#loginDlg').showModal();
+}
+function setUser(u){S.user=u;store.set('user',u);$('#loginBtn .lbl').textContent=u?u.name.split(' ')[0]:'Войти';if(current)renderBook()}
+
+/* ================== SETTINGS ================== */
+function applySettings(){
+ const s=S.settings,h=document.documentElement;
+ h.dataset.font=s.font;h.dataset.contrast=s.contrast;
+ if(s.theme==='auto')delete h.dataset.theme;else h.dataset.theme=s.theme;
+ h.classList.toggle('simple',s.simple==='on');h.classList.toggle('reduce',s.reduce==='on');h.classList.toggle('bigplayer',s.bigplayer==='on');h.classList.toggle('lg-tap',s.font!=='m'||s.simple==='on');
+ $$('#aaDlg .seg').forEach(g=>$$('button',g).forEach(b=>b.setAttribute('aria-pressed',s[g.dataset.set]===b.dataset.v)));
+ $('#pBig').setAttribute('aria-pressed',s.bigplayer==='on');
+ store.set('settings',s);
+}
+
+/* ================== SEARCH ================== */
+let sugIdx=-1,sugTimer;
+function suggest(){
+ const q=$('#q').value.trim(),box=$('#suggest');
+ if(q.length<1){box.hidden=true;$('#q').setAttribute('aria-expanded','false');return}
+ const nq=norm(q);
+ const res=BOOKS.map(b=>{const nar=b.audio?NARRATORS[b.audio.narrator].name:'';
+  const where=norm(b.title).includes(nq)?'title':norm(b.author).includes(nq)?'author':norm(nar).includes(nq)?'nar':null;return where&&{b,where,nar}}).filter(Boolean).slice(0,8);
+ sugIdx=-1;
+ box.innerHTML=res.length?res.map((r,i)=>`<button role="option" id="sg${i}" data-open="${r.b.slug}" aria-selected="false">${cover(r.b)}<span><b>${hl(r.b.title,q)}</b><small>${hl(r.b.author,q)}${r.where==='nar'?' · читает '+hl(r.nar,q):''}</small></span></button>`).join('')
+  :`<div style="padding:1rem;color:var(--muted)">Ничего не нашлось по запросу «${esc(q)}». Попробуйте другое слово.</div>`;
+ box.hidden=false;$('#q').setAttribute('aria-expanded','true');
+}
+function applySearch(){S.q=$('#q').value;S.shown=12;$('#suggest').hidden=true;renderCatalog();$('#catalog').scrollIntoView()}
+
+/* ================== DOWNLOAD ================== */
+function download(fmt){
+ const b=bySlug(current);if(!b||!b.dl){toast('Скачивание недоступно по условиям лицензии',true);return}
+ track(b.slug,'download');
+ if(fmt==='TXT'){
+  const txt=`${b.title}\n${b.author}, ${b.year}\n\n${b.d}\n\n— Демо-файл Читариума. На рабочем сайте здесь будет полный текст книги.`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));a.download=b.slug+'.txt';document.body.append(a);a.click();a.remove();
+  toast(`Готово: книга «${b.title}» скачивается в формате TXT`);
+ } else toast(`Демо-версия: на рабочем сайте файл ${b.slug}.${fmt.toLowerCase()} придёт с сервера. Попробуйте TXT — он скачается сразу.`,true);
+ renderTop();renderHero();
+}
+
+/* ================== EVENTS ================== */
+document.addEventListener('click',e=>{
+ const t=e.target.closest('[data-open],[data-play],[data-genre],[data-rate],[data-frate],[data-dl],[data-helpful],[data-report],[data-close],[data-login],[data-oauth],[data-scroll],[data-info],#moreDesc,#shareBtn,#clearAll,#clearAll2,#logout,.spoiler,#aaDlg .seg button');
+ if(!t)return;
+ if(t.matches('#aaDlg .seg button')){S.settings[t.parentElement.dataset.set]=t.dataset.v;applySettings();return}
+ if(t.dataset.play!==undefined&&t.dataset.play){e.stopPropagation();play(t.dataset.play,t.dataset.ch!=null?+t.dataset.ch:null);if(t.closest('.chapters')||t.closest('#bookBody'))toast('Воспроизведение началось — плеер внизу экрана');return}
+ if(t.dataset.open){$('#suggest').hidden=true;openBook(t.dataset.open,t.dataset.jump);return}
+ if(t.dataset.genre){const g=t.dataset.genre;S.genres.has(g)?S.genres.delete(g):S.genres.add(g);S.shown=12;renderGenres();renderCatalog();if(S.genres.has(g))$('#catalog').scrollIntoView();return}
+ if(t.dataset.rate){if(!S.user){toast('Войдите, чтобы оценить книгу',true);openLogin();return}
+  const v=+t.dataset.rate;S.myRatings[current]=v;store.set('ratings',S.myRatings);pickRating=v;renderBook();renderAll();toast(`Готово: ваша оценка ${v} из 5 сохранена`);return}
+ if(t.dataset.frate){pickRating=+t.dataset.frate;$$('#formStars button').forEach(b=>b.classList.toggle('on',+b.dataset.frate<=pickRating));return}
+ if(t.dataset.dl){download(t.dataset.dl);return}
+ if(t.dataset.helpful){const id=t.dataset.helpful;if(S.helpful[id])delete S.helpful[id];else S.helpful[id]=1;store.set('helpful',S.helpful);renderBook();return}
+ if(t.dataset.report){toast('Готово: жалоба отправлена модератору');return}
+ if(t.dataset.close!==undefined){t.closest('dialog').close();return}
+ if(t.dataset.login!==undefined){openLogin();return}
+ if(t.dataset.oauth){setUser({name:'Читатель',email:'reader@'+t.dataset.oauth.toLowerCase()+'.demo'});$('#loginDlg').close();toast(`Готово: вы вошли через ${t.dataset.oauth}`);return}
+ if(t.dataset.scroll){$('#blk-'+t.dataset.scroll).scrollIntoView({block:'start'});return}
+ if(t.dataset.info){e.preventDefault();const info={about:['О проекте','Читариум — онлайн-библиотека для всех, кто любит книги: от 16 до 80 лет и старше. Ищите, слушайте, скачивайте и делитесь впечатлениями.'],rights:['Правообладателям','Все книги на сайте — собственные или лицензированные материалы. Если вы считаете, что ваши права нарушены, напишите на rights@chitarium.demo — мы ответим в течение 3 рабочих дней.'],privacy:['Политика конфиденциальности','Мы храним только имя, email, ваши оценки, отзывы и прогресс прослушивания. Данные не передаются третьим лицам.'],terms:['Пользовательское соглашение','Отзывы должны быть вежливыми и относиться к книге. Скачанные книги предназначены только для личного использования.'],contacts:['Контакты','Почта: hello@chitarium.demo. Телефон поддержки: 8 800 000-00-00 (звонок бесплатный, ежедневно с 9 до 21).']}[t.dataset.info];
+  $('#infoBody').innerHTML=`<h2 style="font-size:1.4rem;margin-bottom:1rem">${info[0]}</h2><p>${info[1]}</p><button class="btn btn-primary" data-close>Понятно</button>`;$('#infoDlg').showModal();return}
+ if(t.id==='moreDesc'){$('#bdesc').classList.remove('clamped');t.remove();return}
+ if(t.id==='shareBtn'){const url=location.href.split('#')[0]+'#book/'+current;(navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(()=>toast('Готово: ссылка на книгу скопирована')).catch(()=>toast('Ссылка: '+url));return}
+ if(t.id==='clearAll'||t.id==='clearAll2'){S.q='';$('#q').value='';S.genres.clear();['#fAudio','#fDl'].forEach(s=>$(s).checked=false);$('#fRating').value='0';$('#fYear').value='';renderGenres();renderCatalog();return}
+ if(t.id==='logout'){setUser(null);$('#loginDlg').close();toast('Вы вышли из профиля');return}
+ if(t.classList.contains('spoiler')){t.classList.remove('spoiler');return}
+});
+document.addEventListener('keydown',e=>{
+ if((e.key==='/'&&!/input|textarea|select/i.test(document.activeElement.tagName))||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k')){e.preventDefault();$('#search').scrollIntoView();$('#q').focus()}
+ if(e.key==='Enter'&&document.activeElement.classList.contains('spoiler'))document.activeElement.classList.remove('spoiler');
+});
+document.addEventListener('submit',e=>{
+ if(e.target.id==='loginForm'){e.preventDefault();const name=$('#lgName').value.trim(),mail=$('#lgMail').value.trim();
+  if(!name||!/^\S+@\S+\.\S+$/.test(mail)){toast('Введите имя и корректный email',true);return}
+  setUser({name,email:mail});$('#loginDlg').close();toast(`Готово: добро пожаловать, ${name}!`)}
+ if(e.target.id==='revForm'){e.preventDefault();const text=$('#revText').value.trim();
+  if(!pickRating){toast('Поставьте оценку от 1 до 5 звёзд',true);return}
+  if(text.length<50){toast(`Отзыв слишком короткий: нужно ещё ${50-text.length} ${plural(50-text.length,'символ','символа','символов')}`,true);return}
+  const hourAgo=Date.now()-3600e3;if(S.myReviews.filter(r=>r.ts>hourAgo).length>=5){toast('Можно публиковать не больше 5 отзывов в час',true);return}
+  S.myRatings[current]=pickRating;store.set('ratings',S.myRatings);
+  S.myReviews.push({id:'u'+Date.now(),slug:current,name:S.user.name,rating:pickRating,text,finished:$('#revFin').checked,spoiler:$('#revSp').checked,helpful:0,date:new Date().toISOString().slice(0,10),ts:Date.now()});
+  store.set('reviews',S.myReviews);revSort='new';renderBook();renderAll();toast('Готово: отзыв опубликован');$('#blk-reviews').scrollIntoView()}
+});
+document.addEventListener('input',e=>{if(e.target.id==='revText')$('#revHint').textContent=`От 50 до 3000 символов. Сейчас: ${e.target.value.length}`});
+document.addEventListener('change',e=>{if(e.target.id==='revSort'){revSort=e.target.value;renderBook()}});
+
+$('#q').addEventListener('input',()=>{clearTimeout(sugTimer);sugTimer=setTimeout(suggest,300)});
+$('#q').addEventListener('keydown',e=>{
+ const opts=$$('#suggest [role=option]');
+ if(e.key==='ArrowDown'||e.key==='ArrowUp'){if(!opts.length)return;e.preventDefault();sugIdx=(sugIdx+(e.key==='ArrowDown'?1:-1)+opts.length)%opts.length;opts.forEach((o,i)=>o.setAttribute('aria-selected',i===sugIdx));$('#q').setAttribute('aria-activedescendant','sg'+sugIdx);opts[sugIdx].scrollIntoView({block:'nearest'})}
+ else if(e.key==='Enter'){e.preventDefault();if(sugIdx>=0&&opts[sugIdx]){$('#suggest').hidden=true;openBook(opts[sugIdx].dataset.open)}else applySearch()}
+ else if(e.key==='Escape')$('#suggest').hidden=true;
+});
+$('#qGo').addEventListener('click',applySearch);
+document.addEventListener('click',e=>{if(!e.target.closest('.search-box'))$('#suggest').hidden=true});
+['#fRating','#fYear','#fAudio','#fDl','#fSort'].forEach(s=>$(s).addEventListener('change',()=>{S.shown=12;renderCatalog()}));
+$('#moreBtn').addEventListener('click',()=>{S.shown+=12;renderCatalog()});
+$('#searchBtn').addEventListener('click',()=>{$('#search').scrollIntoView();$('#q').focus()});
+$('#aaBtn').addEventListener('click',()=>$('#aaDlg').showModal());
+$('#themeBtn').addEventListener('click',()=>{
+ const dark=S.settings.theme==='dark'||(S.settings.theme==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);
+ S.settings.theme=dark?'light':'dark';applySettings();toast(dark?'Светлая тема':'Тёмная тема')});
+$('#loginBtn').addEventListener('click',openLogin);
+$('#bookDlg').addEventListener('close',closeBook);
+$$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
+
+$('#pPlay').addEventListener('click',()=>{P.playing=!P.playing;updP();saveP(true)});
+$('#pBack').addEventListener('click',()=>seek(-15));$('#pFwd').addEventListener('click',()=>seek(15));
+$('#pSeek').addEventListener('input',e=>{P.pos=+e.target.value;updP()});$('#pSeek').addEventListener('change',()=>saveP(true));
+$('#pSpeed').addEventListener('change',e=>{P.speed=+e.target.value});
+$('#pChapter').addEventListener('change',e=>{P.ch=+e.target.value;P.pos=0;updP();saveP(true);if(current===P.slug)renderBook()});
+$('#pSleep').addEventListener('change',e=>{const v=e.target.value;P.sleepAt=null;P.sleepCh=false;
+ if(v==='ch'){P.sleepCh=true;toast('Таймер сна: остановим в конце главы')}else if(+v){P.sleepAt=Date.now()+v*60e3;toast(`Таймер сна: остановим через ${v} мин`)}});
+$('#pBig').addEventListener('click',()=>{S.settings.bigplayer=S.settings.bigplayer==='on'?'off':'on';applySettings()});
+$('#pClose').addEventListener('click',()=>{saveP(true);P.playing=false;P.slug=null;$('#player').hidden=true;document.body.classList.remove('has-player');renderAudio()});
+
+function route(){const m=location.hash.match(/^#book\/([\w-]+)/);if(m&&bySlug(m[1]))openBook(m[1])}
+window.addEventListener('hashchange',route);
+
+/* ================== INIT ================== */
+applySettings();
+if(S.user)$('#loginBtn .lbl').textContent=S.user.name.split(' ')[0];
+renderAll();
+route();
+</script>
+</body>
+</html>
